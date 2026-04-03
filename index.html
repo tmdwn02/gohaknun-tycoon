@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>고학번의 하루 🎓</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- 타이틀 화면 -->
+  <div id="screen-title" class="screen active">
+    <div class="title-container">
+      <div class="title-emoji">🎓</div>
+      <h1 class="title-main">고학번의 하루</h1>
+      <p class="title-sub">서울대 생존 타이쿤</p>
+      <p class="title-desc">상황에 맞는 행동을 순서대로 클릭해<br>제한시간 안에 오늘 하루를 버텨라!</p>
+      <button class="btn-start" onclick="startGame()">생존 시작하기</button>
+      <div class="title-tip">상황: 등교 · 혼밥 · 팀플독박 · 휴강사태 · 잔디광장</div>
+    </div>
+  </div>
+
+  <!-- 게임 화면 -->
+  <div id="screen-game" class="screen">
+    <!-- HUD -->
+    <div class="hud">
+      <div class="hud-item">📅 <span id="hud-day">1일차</span></div>
+      <div class="hud-item hud-timer">
+        ⏱️
+        <div class="timer-bar-wrap">
+          <div class="timer-bar" id="timer-bar"></div>
+        </div>
+      </div>
+      <div class="hud-item">📊 <span id="hud-money">생존 0점</span></div>
+    </div>
+
+    <!-- 손님 카드 + 주문 -->
+    <div class="customer-section">
+      <div class="customer-card" id="customer-card">
+        <div class="customer-avatar" id="customer-avatar">👤</div>
+        <div class="customer-name" id="customer-name">손님</div>
+        <div class="customer-quote" id="customer-quote">"오늘도 버텨야지..."</div>
+      </div>
+      <div class="order-section">
+        <div class="order-label">미션 <span id="order-progress">1/5</span></div>
+        <div class="order-display" id="order-display"></div>
+      </div>
+    </div>
+
+    <!-- 행동 수행 영역 -->
+    <div class="assembly-section">
+      <div class="assembly-label">수행 완료</div>
+      <div class="burger-stack" id="burger-stack">
+        <div class="empty-plate">📭</div>
+      </div>
+    </div>
+
+    <!-- 행동 버튼 -->
+    <div class="ingredients-section" id="ingredients-section"></div>
+
+    <!-- 피드백 메시지 -->
+    <div class="feedback-msg" id="feedback-msg"></div>
+  </div>
+
+  <!-- 일 종료 화면 (업그레이드) -->
+  <div id="screen-result" class="screen">
+    <div class="end-container">
+      <div class="end-emoji" id="result-emoji">🎉</div>
+      <h2 class="end-title" id="result-title">1일차 완료!</h2>
+      <div class="result-stats" id="result-stats"></div>
+      <div class="upgrade-section" id="upgrade-section">
+        <h3 class="upgrade-title">업그레이드 선택</h3>
+        <div class="upgrade-list" id="upgrade-list"></div>
+      </div>
+      <button class="btn-start" id="btn-next-day" onclick="nextDay()">다음 날 시작 →</button>
+    </div>
+  </div>
+
+  <!-- 게임오버 화면 -->
+  <div id="screen-gameover" class="screen">
+    <div class="end-container">
+      <div class="end-emoji">😵</div>
+      <h2 class="end-title">해고됨</h2>
+      <p class="end-desc" id="gameover-desc">손님을 너무 많이 놓쳤습니다</p>
+      <div class="result-stats" id="gameover-stats"></div>
+      <button class="btn-start" onclick="location.reload()">다시 시작</button>
+    </div>
+  </div>
+
+  <!-- 엔딩 화면 -->
+  <div id="screen-ending" class="screen">
+    <div class="end-container">
+      <div class="end-emoji" id="ending-emoji">🏆</div>
+      <h2 class="end-title" id="ending-title">알바 완주!</h2>
+      <p class="end-desc" id="ending-desc">수고했어요.</p>
+      <div class="result-stats" id="ending-stats"></div>
+      <button class="btn-start" onclick="location.reload()">다시 플레이</button>
+    </div>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>
