@@ -5,20 +5,20 @@
 // ─── 행동 정의 (버거 재료 → 고학번 행동) ───
 const INGREDIENTS = {
   wake:      { name: '기상',    bg: '#f5c842', color: '#333', emoji: '🌅' },
-  queue:     { name: '줄서기',  bg: '#4ecdc4', color: '#fff', emoji: '🚶' },
-  board:     { name: '탑승',    bg: '#2980b9', color: '#fff', emoji: '🚌' },
+  queue:     { name: '셔틀줄서기', bg: '#4ecdc4', color: '#fff', emoji: '🚶' },
+  board:     { name: '셔틀탑승',  bg: '#2980b9', color: '#fff', emoji: '🚌' },
   check:     { name: '공지확인',bg: '#8e44ad', color: '#fff', emoji: '📱' },
   attend:    { name: '출석체크',bg: '#27ae60', color: '#fff', emoji: '✍️' },
-  rice:      { name: '밥받기',  bg: '#c8883a', color: '#fff', emoji: '🍚' },
+  rice:      { name: '학식받기', bg: '#c8883a', color: '#fff', emoji: '🍚' },
   alone:     { name: '혼밥수용',bg: '#7b3a1e', color: '#fff', emoji: '😶' },
   kakaotalk: { name: '팀카톡',  bg: '#e8c233', color: '#333', emoji: '💬' },
-  everytime: { name: '에타',    bg: '#e74c3c', color: '#fff', emoji: '🔴' },
+  everytime: { name: '에타확인', bg: '#e74c3c', color: '#fff', emoji: '🔴' },
   goHome:    { name: '귀가',    bg: '#7f8c8d', color: '#fff', emoji: '🏠' },
-  search:    { name: '검색',    bg: '#3d5a80', color: '#fff', emoji: '🔍' },
+  search:    { name: '자료조사', bg: '#3d5a80', color: '#fff', emoji: '🔍' },
   seat:      { name: '자리잡기',bg: '#e07c24', color: '#fff', emoji: '🪑' },
-  submit:    { name: '제출',    bg: '#1a6b3c', color: '#fff', emoji: '📤' },
+  submit:    { name: '과제제출', bg: '#1a6b3c', color: '#fff', emoji: '📤' },
   cafe:      { name: '카페',    bg: '#6b3a2a', color: '#fff', emoji: '☕' },
-  print:     { name: '출력',    bg: '#5d4e75', color: '#fff', emoji: '🖨️' },
+  writeRep:  { name: '레포트작성',bg: '#2c6e49', color: '#fff', emoji: '✏️' },
   nap:       { name: '쪽잠',    bg: '#34495e', color: '#fff', emoji: '😴' },
 };
 const ING_KEYS = Object.keys(INGREDIENTS);
@@ -40,7 +40,7 @@ const RECIPES = [
     customer: { name: '잔디광장',     emoji: '🌿', patience: 2.0, quote: '"오늘 축제래..."' } },
   { name: '도서관 자리잡기',ings: ['wake', 'queue', 'search', 'seat'],                                                    price: 4000,  desc: '1열은 이미 꽉 찼다',
     customer: { name: '중앙도서관',   emoji: '📚', patience: 0.9, quote: '"자리가 없습니다..."' } },
-  { name: '레포트 제출',    ings: ['search', 'alone', 'print', 'submit'],                                                  price: 5000,  desc: '프린터 앞에서 줄 서기',
+  { name: '레포트 제출',    ings: ['search', 'alone', 'writeRep', 'submit'],                                                  price: 5000,  desc: '프린터 앞에서 줄 서기',
     customer: { name: '레포트',       emoji: '📄', patience: 1.0, quote: '"형식 맞춰서 내세요"' } },
   /* ── 5단계 이상 ── */
   { name: '휴강 사태',      ings: ['wake', 'queue', 'board', 'everytime', 'goHome'],                                       price: 4500,  desc: '모르고 학교까지 왔다',
@@ -99,6 +99,7 @@ function initGame() {
     currentBurger: [],
     currentCustomer: null,
     currentRecipe: null,
+    lastRecipeName: null,
     timer: 0,
     timerMax: 0,
     timerRaf: null,
@@ -122,7 +123,7 @@ function startGame() {
 function startDay() {
   G.ordersDone   = 0;
   G.ordersFailed = 0;
-  document.getElementById('hud-day').textContent   = `${G.day}일차`;
+  document.getElementById('hud-day').textContent   = `${G.day}단계`;
   document.getElementById('hud-money').textContent = `생존 ${G.money.toLocaleString()}점`;
   renderIngredientButtons();
   nextOrder();
@@ -142,7 +143,14 @@ function nextOrder() {
 
   const minR = cfg.minRecipe ?? 0;
   const maxR = Math.min(cfg.maxRecipe, RECIPES.length - 1);
-  G.currentRecipe   = RECIPES[minR + Math.floor(Math.random() * (maxR - minR + 1))];
+  let recipe;
+  let tries = 0;
+  do {
+    recipe = RECIPES[minR + Math.floor(Math.random() * (maxR - minR + 1))];
+    tries++;
+  } while (recipe.name === G.lastRecipeName && tries < 10);
+  G.currentRecipe   = recipe;
+  G.lastRecipeName  = recipe.name;
   G.currentCustomer = G.currentRecipe.customer;
   G.currentOrder  = [...G.currentRecipe.ings];
   G.currentBurger = [];
@@ -248,9 +256,11 @@ function endDay() {
 
   if (!success) { gameOver(); return; }
 
+  if (G.day >= TOTAL_DAYS) { showEnding(); return; }
+
   showScreen('screen-result');
   document.getElementById('result-emoji').textContent = G.ordersFailed === 0 ? '🏆' : '😮‍💨';
-  document.getElementById('result-title').textContent = `${G.day}일차 생존!`;
+  document.getElementById('result-title').textContent = `${G.day}단계 생존!`;
   document.getElementById('result-stats').innerHTML = `
     <div>✅ 버텨낸 상황: ${G.ordersDone}개</div>
     <div>❌ 못 버틴 상황: ${G.ordersFailed}개</div>
@@ -258,7 +268,7 @@ function endDay() {
   `;
 
   document.getElementById('upgrade-section').style.display = 'none';
-  document.getElementById('btn-next-day').textContent = G.day < TOTAL_DAYS ? '다음 날 버티기 →' : '결과 보기 →';
+  document.getElementById('btn-next-day').textContent = '다음 단계 버티기 →';
 }
 
 function nextDay() {
@@ -272,7 +282,7 @@ function nextDay() {
 function gameOver() {
   cancelTimer();
   showScreen('screen-gameover');
-  document.getElementById('gameover-desc').textContent = `${G.day}일차에서 너무 많은 상황을 버티지 못했습니다`;
+  document.getElementById('gameover-desc').textContent = `오랜만의 학교생활을 버티지 못하고 중도휴학 결정. 졸업은 더더욱 멀어져만 간다..`;
   document.getElementById('gameover-stats').innerHTML  = finalStatsHTML();
 }
 
@@ -292,7 +302,7 @@ function showEnding() {
 
 function finalStatsHTML() {
   return `
-    <div>📅 도달 일차: ${G.day}일</div>
+    <div>📅 도달 단계: ${G.day}단계</div>
     <div>✅ 총 버텨낸 상황: ${G.totalOrders}개</div>
     <div>❌ 총 실패: ${G.totalFailed}번</div>
     <div>📊 최종 생존점수: ${G.money.toLocaleString()}점</div>
