@@ -15,8 +15,8 @@
       <h1 class="title-main">고학번의 하루</h1>
       <p class="title-sub">막학기생 생존 타이쿤</p>
       <p class="title-desc">1년간의 휴학 이후, 졸업을 한 학기 앞두고 복학한 당신🎓<br>동기들은 이미 다 떠난 학교에서 홀로 이번 학기를 살아남아야 한다😨<br><br>게임 방법: 상황에 맞는 행동 버튼을 순서대로 클릭해 하루를 버텨라💪<br>총 5단계까지 통과 시 무사 졸업 가능🥳</p>
-      <button class="btn-start" onclick="startGame()">생존 시작하기</button>
-      <button class="btn-settings" onclick="showSettings()">⚙️ 설정</button>
+      <button class="btn-start" onclick="showSettings(true)">생존 시작하기</button>
+      <button class="btn-settings" onclick="showSettings(false)">⚙️ 설정만 보기</button>
       <button class="btn-settings" onclick="showLeaderboard()">🏆 리더보드</button>
     </div>
   </div>
@@ -51,7 +51,7 @@
         <p class="diff-desc">이 횟수 초과 시 중도휴학</p>
       </div>
 
-      <button class="btn-start" onclick="saveSettings()">저장하고 돌아가기</button>
+      <button class="btn-start" id="btn-settings-save" onclick="saveSettings()">설정 완료 & 시작하기 🎮</button>
     </div>
   </div>
 

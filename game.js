@@ -438,8 +438,13 @@ function applySettingsToUI() {
   if (dd) dd.textContent = DIFF_INFO[SETTINGS.difficulty].label;
 }
 
-function showSettings() {
+let _fromStart = false;
+
+function showSettings(fromStart = false) {
+  _fromStart = fromStart;
   applySettingsToUI();
+  const btn = document.getElementById('btn-settings-save');
+  if (btn) btn.textContent = fromStart ? '설정 완료 & 시작하기 🎮' : '저장하고 돌아가기';
   showScreen('screen-settings');
 }
 
@@ -461,7 +466,11 @@ function saveSettings() {
   const ni = document.getElementById('setting-nickname').value.trim();
   SETTINGS.nickname = ni || '고학번';
   localStorage.setItem('gohaknun-settings', JSON.stringify(SETTINGS));
-  showScreen('screen-title');
+  if (_fromStart) {
+    startGame();
+  } else {
+    showScreen('screen-title');
+  }
 }
 
 // 페이지 로드 시 설정 불러오기
