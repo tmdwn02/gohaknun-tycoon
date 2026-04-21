@@ -209,7 +209,9 @@ function clickIngredient(key) {
   } else {
     const penalty = Math.max(1, 3 - G.penaltyReduce);
     G.timer = Math.max(0, G.timer - penalty);
-    showFeedback(`❌ 틀렸어요! 다음은 "${INGREDIENTS[expected].name}"`, 'bad');
+    G.money = Math.max(0, G.money - 500);
+    document.getElementById('hud-money').textContent = `생존 ${G.money.toLocaleString()}점`;
+    showFeedback(`❌ 틀렸어요! -500점 (다음: "${INGREDIENTS[expected].name}")`, 'bad');
     shakeElement(`ing-${key}`);
   }
 }
