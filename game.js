@@ -466,3 +466,67 @@ function saveSettings() {
 
 // 페이지 로드 시 설정 불러오기
 loadSettings();
+
+// ════════════════════════════════════════
+//  리더보드 (Supabase)
+// ════════════════════════════════════════
+const SB_URL = 'https://dilimrbdqnreirjzwglm.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRpbGltcmJkcW5yZWlyanp3Z2xtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2OTg3NzUsImV4cCI6MjA5MjI3NDc3NX0.8F9dsKd2AVE7xRl5iSlde0SAuHJen38bp1w7T8wvHGI';
+const SB_HEADERS = {
+  'apikey': SB_KEY,
+  'Authorization': `Bearer ${SB_KEY}`,
+  'Content-Type': 'application/json',
+};
+
+async function submitScore() {
+  const body = {
+    nickname:   SETTINGS.nickname || '고학번',
+    score:      G.money,
+    difficulty: SETTINGS.difficulty,
+  };
+  try {
+    await fetch(`${SB_URL}/rest/v1/scores`, {
+      method:  'POST',
+      headers: { ...SB_HEADERS, 'Prefer': 'return=minimal' },
+      body:    JSON.stringify(body),
+    });
+  } catch(e) { console.error('점수 등록 실패', e); }
+}
+
+async function fetchLeaderboard() {
+  try {
+    const res = await fetch(
+      `${SB_URL}/rest/v1/scores?select=nickname,score,difficulty&order=score.desc&limit=10`,
+      { headers: SB_HEADERS }
+    );
+    return await res.json();
+  } catch(e) { return null; }
+}
+
+async function showLeaderboard() {
+  showScreen('screen-leaderboard');
+  const el = document.getElementById('leaderboard-list');
+  el.innerHTML = '<div class="lb-loading">불러오는 중... ⏳</div>';
+  const data = await fetchLeaderboard();
+  if (!data || !data.length) {
+    el.innerHTML = '<div class="lb-empty">아직 기록이 없어요! 첫 번째 주인공이 되어봐 🎓</div>';
+    return;
+  }
+  const medals = ['🥇','🥈','🥉'];
+  const diffLabel = { easy:'쉬움', normal:'보통', hard:'어려움' };
+  el.innerHTML = data.map((row, i) => `
+    <div class="lb-row ${i < 3 ? 'lb-top' : ''}">
+      <span class="lb-rank">${medals[i] || i + 1}</span>
+      <span class="lb-name">${row.nickname}</span>
+      <span class="lb-diff">${diffLabel[row.difficulty] ?? row.difficulty}</span>
+      <span class="lb-score">${row.score.toLocaleString()}점</span>
+    </div>
+  `).join('');
+}
+
+async function registerAndShowLeaderboard() {
+  const btn = document.getElementById('btn-register');
+  if (btn) { btn.textContent = '등록 중...'; btn.disabled = true; }
+  await submitScore();
+  await showLeaderboard();
+}
