@@ -108,7 +108,7 @@ function initGame() {
     penaltyReduce: 0,
     bonusMult: 1.0,
     speedBonus: false,
-    maxFails: 3,
+    maxFails: SETTINGS.maxFails,
     appliedUpgrades: [],
   };
 }
@@ -155,7 +155,7 @@ function nextOrder() {
   G.currentOrder  = [...G.currentRecipe.ings];
   G.currentBurger = [];
 
-  G.timerMax = (cfg.timePerOrder + G.bonusTime) * G.currentCustomer.patience;
+  G.timerMax = (cfg.timePerOrder + G.bonusTime) * G.currentCustomer.patience * DIFF_INFO[SETTINGS.difficulty].mult;
   G.timer    = G.timerMax;
 
   renderCustomer();
@@ -301,7 +301,11 @@ function showEnding() {
 }
 
 function finalStatsHTML() {
+  const nick = SETTINGS.nickname || '고학번';
+  const diff = { easy: '쉬움', normal: '보통', hard: '어려움' }[SETTINGS.difficulty];
   return `
+    <div>👤 플레이어: ${nick}</div>
+    <div>⚙️ 난이도: ${diff}</div>
     <div>📅 도달 단계: ${G.day}단계</div>
     <div>✅ 총 버텨낸 상황: ${G.totalOrders}개</div>
     <div>❌ 총 실패: ${G.totalFailed}번</div>
@@ -402,3 +406,63 @@ function shakeElement(id) {
   el.classList.add('shake');
   setTimeout(() => el.classList.remove('shake'), 400);
 }
+
+// ════════════════════════════════════════
+//  설정 (Settings)
+// ════════════════════════════════════════
+const DIFF_INFO = {
+  easy:   { mult: 1.5, label: '타이머 1.5배 느리게' },
+  normal: { mult: 1.0, label: '기본 타이머 속도' },
+  hard:   { mult: 0.7, label: '타이머 0.7배 빠르게' },
+};
+
+let SETTINGS = { nickname: '', difficulty: 'normal', maxFails: 3 };
+
+function loadSettings() {
+  try {
+    const saved = localStorage.getItem('gohaknun-settings');
+    if (saved) SETTINGS = { ...SETTINGS, ...JSON.parse(saved) };
+  } catch(e) {}
+  applySettingsToUI();
+}
+
+function applySettingsToUI() {
+  const ni = document.getElementById('setting-nickname');
+  if (ni) ni.value = SETTINGS.nickname;
+  const fv = document.getElementById('setting-fails');
+  if (fv) fv.textContent = SETTINGS.maxFails;
+  document.querySelectorAll('.diff-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.diff === SETTINGS.difficulty);
+  });
+  const dd = document.getElementById('diff-desc');
+  if (dd) dd.textContent = DIFF_INFO[SETTINGS.difficulty].label;
+}
+
+function showSettings() {
+  applySettingsToUI();
+  showScreen('screen-settings');
+}
+
+function selectDiff(diff) {
+  SETTINGS.difficulty = diff;
+  document.querySelectorAll('.diff-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.diff === diff);
+  });
+  const dd = document.getElementById('diff-desc');
+  if (dd) dd.textContent = DIFF_INFO[diff].label;
+}
+
+function changeFails(delta) {
+  SETTINGS.maxFails = Math.max(1, Math.min(5, SETTINGS.maxFails + delta));
+  document.getElementById('setting-fails').textContent = SETTINGS.maxFails;
+}
+
+function saveSettings() {
+  const ni = document.getElementById('setting-nickname').value.trim();
+  SETTINGS.nickname = ni || '고학번';
+  localStorage.setItem('gohaknun-settings', JSON.stringify(SETTINGS));
+  showScreen('screen-title');
+}
+
+// 페이지 로드 시 설정 불러오기
+loadSettings();
