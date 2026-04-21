@@ -525,8 +525,10 @@ async function showLeaderboard() {
 }
 
 async function registerAndShowLeaderboard() {
-  const btn = document.getElementById('btn-register');
-  if (btn) { btn.textContent = '등록 중...'; btn.disabled = true; }
+  ['btn-register', 'btn-register-over'].forEach(id => {
+    const btn = document.getElementById(id);
+    if (btn) { btn.textContent = '등록 중...'; btn.disabled = true; }
+  });
   await submitScore();
   await showLeaderboard();
 }
